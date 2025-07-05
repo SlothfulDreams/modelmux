@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/ui/button";
 function App() {
   return (
     <div className="bg-red-100 min-h-screen items-center justify-center">
