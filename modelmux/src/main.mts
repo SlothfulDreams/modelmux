@@ -1,6 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
+import Store from "electron-store";
+
+// UserPref
+const userPref = new Store<{ model: string }>();
+userPref.set('model', 'gemini');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
@@ -99,8 +99,9 @@ export function ChatInterface() {
           <div className="flex gap-2">
             <Input
               value={inputValue}
+              type={"text"}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="Type your message here..."
               className="flex-1"
             />
