@@ -3,6 +3,7 @@ import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ollama from "ollama";
 
 interface Message {
   id: string;
@@ -10,6 +11,14 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
 }
+
+const modelMessage = async (userMessage: string) => {
+  const message = await ollama.chat({
+    model: "qwen2.5:0.5b",
+    messages: [{ role: "user", content: userMessage }],
+  });
+  return message.message.content;
+};
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -20,6 +29,7 @@ export function ChatInterface() {
       timestamp: new Date(),
     },
   ]);
+
   const [inputValue, setInputValue] = useState("");
 
   const handleSendMessage = () => {
@@ -33,19 +43,21 @@ export function ChatInterface() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
 
-    // Simulate AI response
-    setTimeout(() => {
+    // LLM response
+
+    async function llmResponse() {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          "I understand your message. This is a simulated response from the AI assistant.",
+        content: await modelMessage(inputValue),
         isUser: false,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
+    }
+
+    setInputValue("");
+    llmResponse();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -94,7 +106,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t bg-background sticky bottom-0">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-2">
             <Input
