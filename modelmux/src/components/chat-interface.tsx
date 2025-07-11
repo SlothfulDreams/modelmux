@@ -12,13 +12,10 @@ interface Message {
   timestamp: Date;
 }
 
-const modelMessage = async (userMessage: string) => {
-  const message = await ollama.chat({
-    model: "qwen2.5:0.5b",
-    messages: [{ role: "user", content: userMessage }],
-  });
-  return message.message.content;
-};
+// interface MemoryMessage {
+//   role: "user" | "system" | "assistant";
+//   content: string;
+// }
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -31,6 +28,20 @@ export function ChatInterface() {
   ]);
 
   const [inputValue, setInputValue] = useState("");
+  const [memory, setMemory] = useState([
+    { role: "assistant", content: "Hi How my i help you today" },
+  ]);
+
+  const modelMessage = async (userMessage: string) => {
+    const new_memory = [...memory, { role: "user", content: userMessage }];
+
+    const msg = await ollama.chat({
+      model: "llama3.2:1b",
+      messages: new_memory,
+    });
+
+    return msg.message.content;
+  };
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -42,22 +53,25 @@ export function ChatInterface() {
       timestamp: new Date(),
     };
 
+    setMemory((prev) => [...prev, { role: "user", content: inputValue }]);
     setMessages((prev) => [...prev, userMessage]);
 
     // LLM response
-
     async function llmResponse() {
+      const ai = await modelMessage(inputValue);
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: await modelMessage(inputValue),
+        content: ai,
         isUser: false,
         timestamp: new Date(),
       };
+      setMemory((prev) => [...prev, { role: "assistant", content: ai }]);
       setMessages((prev) => [...prev, aiResponse]);
     }
 
     setInputValue("");
     llmResponse();
+    console.log(memory);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
