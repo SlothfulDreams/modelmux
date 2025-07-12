@@ -1,9 +1,8 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ollama from "ollama";
 import { Response } from "@/lib/ollama";
 
 interface Message {
