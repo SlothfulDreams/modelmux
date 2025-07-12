@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Send, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ollama from "ollama";
+import { Response } from "@/lib/ollama";
 
 interface Message {
   id: string;
@@ -12,10 +13,10 @@ interface Message {
   timestamp: Date;
 }
 
-// interface MemoryMessage {
-//   role: "user" | "system" | "assistant";
-//   content: string;
-// }
+interface MemoryMessage {
+  role: "user" | "system" | "assistant";
+  content: string;
+}
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -28,20 +29,7 @@ export function ChatInterface() {
   ]);
 
   const [inputValue, setInputValue] = useState("");
-  const [memory, setMemory] = useState([
-    { role: "assistant", content: "Hi How my i help you today" },
-  ]);
-
-  const modelMessage = async (userMessage: string) => {
-    const new_memory = [...memory, { role: "user", content: userMessage }];
-
-    const msg = await ollama.chat({
-      model: "llama3.2:1b",
-      messages: new_memory,
-    });
-
-    return msg.message.content;
-  };
+  const [memory, setMemory] = useState<MemoryMessage[]>([]);
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -57,21 +45,17 @@ export function ChatInterface() {
     setMessages((prev) => [...prev, userMessage]);
 
     // LLM response
-    async function llmResponse() {
-      const ai = await modelMessage(inputValue);
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: ai,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMemory((prev) => [...prev, { role: "assistant", content: ai }]);
-      setMessages((prev) => [...prev, aiResponse]);
-    }
 
+    async function run() {
+      const { message, data } = await Response(
+        { role: "user", content: inputValue },
+        memory
+      );
+      setMemory((prev) => [...prev, { role: "assistant", content: message }]);
+      setMessages((prev) => [...prev, data]);
+    }
+    run();
     setInputValue("");
-    llmResponse();
-    console.log(memory);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
