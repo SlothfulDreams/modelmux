@@ -17,11 +17,6 @@ async function sendModelMessage(
   return msg.message.content;
 }
 
-// TODO
-// Abstract the model in modelMessage
-// Move LLMResponse to here
-// Redo LLMResponse looks like shit
-
 export async function Response(
   userMessage: MemoryMessage,
   memoryState: MemoryMessage[]
@@ -40,4 +35,9 @@ export async function Response(
 export async function modelList() {
   const list = await ollama.list();
   return list;
+}
+
+export async function getCurrentModel() {
+  const res = await ollama.ps();
+  return res.models[0]?.name;
 }
