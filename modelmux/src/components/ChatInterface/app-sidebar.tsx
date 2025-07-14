@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   MessageSquare,
   Plus,
@@ -20,6 +21,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { SettingsModal } from "@/components/settings-modal";
 
 // Chat history items
 const chatItems = [
@@ -66,44 +68,28 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
-    <Sidebar collapsible="icon">
-      {/* Sidebar header: always render trigger, only show title when expanded */}
-      <div
-        className={`flex items-center p-4 border-b ${
-          state === "collapsed" ? "justify-center" : "gap-2"
-        }`}
-      >
-        <SidebarTrigger />
-        {state === "expanded" && (
-          <span className="text-lg font-bold">ModelMux</span>
-        )}
-      </div>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Actions</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className={state === "collapsed" ? "mt-10" : ""}>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {(state === "collapsed" ? chatItems.slice(0, 1) : chatItems).map(
-                (item) => (
+    <>
+      <Sidebar collapsible="icon">
+        {/* Sidebar header: always render trigger, only show title when expanded */}
+        <div
+          className={`flex items-center p-4 border-b ${
+            state === "collapsed" ? "justify-center" : "gap-2"
+          }`}
+        >
+          <SidebarTrigger />
+          {state === "expanded" && (
+            <span className="text-lg font-bold">ModelMux</span>
+          )}
+        </div>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Actions</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className={state === "collapsed" ? "mt-10" : ""}>
+                {menuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <a href={item.url}>
@@ -112,22 +98,46 @@ export function AppSidebar() {
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Settings />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {(state === "collapsed"
+                  ? chatItems.slice(0, 1)
+                  : chatItems
+                ).map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={() => setIsSettingsOpen(true)}>
+                <Settings />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+      <SettingsModal
+        open={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+    </>
   );
 }

@@ -15,7 +15,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
       <div
         className={`rounded-lg p-4 relative group ${
           message.isUser
-            ? "bg-primary text-primary-foreground"
+            ? "bg-accent text-accent-foreground"
             : "bg-muted"
         }`}
       >

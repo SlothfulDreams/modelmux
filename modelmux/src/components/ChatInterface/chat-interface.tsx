@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
-import { modelList, Response } from "@/lib/ollama";
+import { Response } from "@/lib/ollama";
 
 export interface Message {
   id: string;
