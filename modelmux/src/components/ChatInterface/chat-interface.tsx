@@ -23,6 +23,7 @@ export function ChatInterface() {
   const [memory, setMemory] = useState<MemoryMessage[]>([]);
 
   const handleSendMessage = async () => {
+    const newUserMessage: MemoryMessage = { role: "user", content: inputValue };
     if (!inputValue.trim()) return;
 
     const userMessage: Message = {
@@ -32,15 +33,17 @@ export function ChatInterface() {
       timestamp: new Date(),
     };
 
-    setMemory((prev) => [...prev, { role: "user", content: inputValue }]);
     setMessages((prev) => [...prev, userMessage]);
 
     // LLM response
-    const { message, data } = await Response(
-      { role: "user", content: inputValue },
-      memory
-    );
-    setMemory((prev) => [...prev, { role: "assistant", content: message }]);
+    const { message, data } = await Response(newUserMessage, memory);
+    const llmMessage: MemoryMessage = {
+      role: "assistant",
+      content: message,
+    };
+
+    setMemory((prev) => [...prev, newUserMessage, llmMessage]);
+
     setMessages((prev) => [...prev, data]);
     setInputValue("");
   };
