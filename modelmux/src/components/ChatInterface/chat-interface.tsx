@@ -1,0 +1,76 @@
+import { useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChatMessages } from "./chat-messages";
+import { ChatInput } from "./chat-input";
+import { Response } from "@/lib/ollama";
+
+export interface Message {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+}
+
+export interface MemoryMessage {
+  role: "user" | "system" | "assistant";
+  content: string;
+}
+
+export function ChatInterface() {
+  const [messages, setMessages] = useState<Message[]>([
+  ]);
+
+  const [inputValue, setInputValue] = useState("");
+  const [memory, setMemory] = useState<MemoryMessage[]>([]);
+
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: inputValue,
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    setMemory((prev) => [...prev, { role: "user", content: inputValue }]);
+    setMessages((prev) => [...prev, userMessage]);
+
+    // LLM response
+    async function run() {
+      const { message, data } = await Response(
+        { role: "user", content: inputValue },
+        memory
+      );
+      setMemory((prev) => [...prev, { role: "assistant", content: message }]);
+      setMessages((prev) => [...prev, data]);
+    }
+    run();
+    setInputValue("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-background">
+      <ScrollArea className="flex-1 p-4">
+        <ChatMessages messages={messages} />
+      </ScrollArea>
+      <div className="p-4 border-t bg-background sticky bottom-0">
+        <div className="max-w-4xl mx-auto">
+          <ChatInput
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyPress}
+            onSend={handleSendMessage}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

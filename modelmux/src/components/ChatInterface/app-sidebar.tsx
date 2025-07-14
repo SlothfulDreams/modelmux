@@ -10,6 +10,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 // Chat history items
@@ -51,14 +53,23 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const { state } = useSidebar();
+
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
+      {/* Sidebar header: always render trigger, only show title when expanded */}
+      <div className={`flex items-center p-4 border-b ${state === 'collapsed' ? 'justify-center' : 'gap-2'}`}>
+        <SidebarTrigger />
+        {state === 'expanded' && (
+          <span className="text-lg font-bold">ModelMux</span>
+        )}
+      </div>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
+          <SidebarGroupLabel>Actions</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {chatItems.map((item) => (
+            <SidebarMenu className={state === 'collapsed' ? 'mt-10' : ''}>
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
@@ -72,10 +83,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Actions</SidebarGroupLabel>
+          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {(state === 'collapsed' ? chatItems.slice(0, 1) : chatItems).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>

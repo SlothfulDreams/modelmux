@@ -1,6 +1,6 @@
-import { AppSidebar } from "./components/app-sidebar";
+import { AppSidebar } from "./components/ChatInterface/app-sidebar";
 import { SidebarProvider, SidebarInset } from "./components/ui/sidebar";
-import { ChatInterface } from "@/components/chat-interface";
+import { ChatInterface } from "@/components/ChatInterface/chat-interface";
 
 function App() {
   return (
