@@ -1,8 +1,20 @@
 import { useState } from "react";
-import { Send, Plus } from "lucide-react";
+import { Send, Plus, RotateCcw, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Response } from "@/lib/ollama";
 
 interface Message {
@@ -86,7 +98,7 @@ export function ChatInterface() {
               }`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-4 ${
+                className={`max-w-[80%] rounded-lg p-4 relative group ${
                   message.isUser
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
@@ -96,6 +108,44 @@ export function ChatInterface() {
                 <span className="text-xs opacity-70 mt-2 block">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
+                {/* dropdown menu for retry icon*/}
+                {!message.isUser && (
+                  <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <Tooltip>
+                        <DropdownMenuTrigger asChild>
+                          <TooltipTrigger asChild>
+                            <button
+                              className="p-1 rounded hover:bg-accent focus:outline-none"
+                              title="More"
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                        </DropdownMenuTrigger>
+                        <TooltipContent side="bottom" align="center">
+                          Retry message
+                        </TooltipContent>
+                      </Tooltip>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="flex items-center gap-2"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Retry
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          Copy message
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          Report issue
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
               </div>
             </div>
           ))}
