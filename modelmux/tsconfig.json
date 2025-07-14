@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "node16",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "dist",
-    "moduleResolution": "node16",
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "baseUrl": "./",
@@ -17,5 +17,8 @@
       "@components/*": ["src/components/*"],
       "@utils/*": ["src/utils/*"]
     }
-  }
+  },
+  "include": ["src", "forge.env.d.ts"]
 }
+
+

@@ -36,3 +36,8 @@ export async function Response(
 
   return { message: llmMessage, data: llmMessageData };
 }
+
+export async function modelList() {
+  const list = await ollama.list();
+  return list;
+}

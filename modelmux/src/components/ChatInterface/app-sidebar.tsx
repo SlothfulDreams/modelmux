@@ -1,4 +1,11 @@
-import { MessageSquare, Plus, History, Settings, Search } from "lucide-react";
+import {
+  MessageSquare,
+  Plus,
+  History,
+  Folder,
+  Settings,
+  Search,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -50,6 +57,11 @@ const menuItems = [
     url: "#",
     icon: History,
   },
+  {
+    title: "Manage Models",
+    url: "#",
+    icon: Folder,
+  },
 ];
 
 export function AppSidebar() {
@@ -58,9 +70,13 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Sidebar header: always render trigger, only show title when expanded */}
-      <div className={`flex items-center p-4 border-b ${state === 'collapsed' ? 'justify-center' : 'gap-2'}`}>
+      <div
+        className={`flex items-center p-4 border-b ${
+          state === "collapsed" ? "justify-center" : "gap-2"
+        }`}
+      >
         <SidebarTrigger />
-        {state === 'expanded' && (
+        {state === "expanded" && (
           <span className="text-lg font-bold">ModelMux</span>
         )}
       </div>
@@ -68,7 +84,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Actions</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className={state === 'collapsed' ? 'mt-10' : ''}>
+            <SidebarMenu className={state === "collapsed" ? "mt-10" : ""}>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -86,16 +102,18 @@ export function AppSidebar() {
           <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {(state === 'collapsed' ? chatItems.slice(0, 1) : chatItems).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {(state === "collapsed" ? chatItems.slice(0, 1) : chatItems).map(
+                (item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

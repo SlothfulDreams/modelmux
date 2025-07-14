@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
-import { Response } from "@/lib/ollama";
+import { modelList, Response } from "@/lib/ollama";
 
 export interface Message {
   id: string;
@@ -17,13 +17,12 @@ export interface MemoryMessage {
 }
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [inputValue, setInputValue] = useState("");
   const [memory, setMemory] = useState<MemoryMessage[]>([]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
     const userMessage: Message = {
@@ -37,15 +36,12 @@ export function ChatInterface() {
     setMessages((prev) => [...prev, userMessage]);
 
     // LLM response
-    async function run() {
-      const { message, data } = await Response(
-        { role: "user", content: inputValue },
-        memory
-      );
-      setMemory((prev) => [...prev, { role: "assistant", content: message }]);
-      setMessages((prev) => [...prev, data]);
-    }
-    run();
+    const { message, data } = await Response(
+      { role: "user", content: inputValue },
+      memory
+    );
+    setMemory((prev) => [...prev, { role: "assistant", content: message }]);
+    setMessages((prev) => [...prev, data]);
     setInputValue("");
   };
 

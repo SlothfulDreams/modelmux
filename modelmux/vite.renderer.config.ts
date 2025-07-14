@@ -1,5 +1,5 @@
-import path from "path"
-import { defineConfig } from "vite"
+import path from "path";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,7 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/components"),
       "@utils": path.resolve(__dirname, "./src/utils"),
-      "@hooks": path.resolve(__dirname, "./src/hooks")
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
     },
-  }
-})
+  },
+});
