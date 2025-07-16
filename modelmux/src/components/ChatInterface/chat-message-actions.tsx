@@ -12,26 +12,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
-import { getCurrentModel } from "@/lib/ollama";
+import { getCurrentModel, modelList } from "@/lib/ollama";
+import { ModelResponse } from "ollama";
 
 export function ChatMessageActions() {
   const [modelName, setModelName] = useState<string | undefined>("");
+  const [models, setModels] = useState<ModelResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    async function fetchModel() {
+    async function fetchData() {
       try {
         setLoading(true);
-        const model = await getCurrentModel();
+        const [model, modelData] = await Promise.all([
+          getCurrentModel(),
+          modelList(),
+        ]);
         setModelName(model);
+        setModels(modelData);
       } catch (err) {
         setError(err as Error);
       } finally {
         setLoading(false);
       }
     }
-    fetchModel();
+    fetchData();
   }, []);
 
   return (
@@ -66,7 +72,10 @@ export function ChatMessageActions() {
             <RotateCcw className="h-3 w-3" />
             Retry
           </DropdownMenuItem>
-          //TODO MAP TO ALL INSTALLED LLM's
+          <DropdownMenuSeparator />
+          {models.map((model) => (
+            <DropdownMenuItem key={model.name}>{model.name}</DropdownMenuItem>
+          ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem>Copy message</DropdownMenuItem>
           <DropdownMenuItem>Report issue</DropdownMenuItem>

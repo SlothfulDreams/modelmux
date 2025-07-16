@@ -1,4 +1,5 @@
 import ollama from "ollama";
+import { list } from "postcss";
 
 interface MemoryMessage {
   role: "user" | "system" | "assistant";
@@ -34,7 +35,7 @@ export async function Response(
 
 export async function modelList() {
   const list = await ollama.list();
-  return list;
+  return list.models;
 }
 
 export async function getCurrentModel() {
