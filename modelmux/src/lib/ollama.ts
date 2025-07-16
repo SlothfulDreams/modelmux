@@ -1,5 +1,4 @@
 import ollama from "ollama";
-import { list } from "postcss";
 
 interface MemoryMessage {
   role: "user" | "system" | "assistant";
