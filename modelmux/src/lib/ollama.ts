@@ -34,7 +34,7 @@ export async function Response(
 
 export async function modelList() {
   const list = await ollama.list();
-  return list;
+  return list.models;
 }
 
 export async function getCurrentModel() {
