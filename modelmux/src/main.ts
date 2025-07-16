@@ -2,12 +2,16 @@ import { app, BrowserWindow } from "electron";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import started from "electron-squirrel-startup";
+import { exec, ChildProcess } from "node:child_process";
+
 // import Store from "electron-store";
 
 // UserPref
 // const userPref = new Store<{ model: string }>();
 // userPref.set("model", "gemini");
 // console.log(userPref.get("model"));
+
+let ollamaProcess: ChildProcess;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -42,7 +46,18 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", () => {
+  // Start ollama serve
+  ollamaProcess = exec("ollama serve", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+  });
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -50,6 +65,13 @@ app.on("ready", createWindow);
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("will-quit", () => {
+  // Kill the ollama process
+  if (ollamaProcess) {
+    ollamaProcess.kill();
   }
 });
 
