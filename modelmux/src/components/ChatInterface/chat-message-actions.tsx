@@ -20,6 +20,8 @@ export function ChatMessageActions() {
   const [models, setModels] = useState<ModelResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -40,10 +42,17 @@ export function ChatMessageActions() {
     fetchData();
   }, []);
 
+  const handleDropdownOpenChange = (open: boolean) => {
+    setDropdownOpen(open);
+    if (open) {
+      setTooltipOpen(false);
+    }
+  };
+
   return (
     <div className="mt-1 flex justify-end w-full">
-      <DropdownMenu>
-        <Tooltip>
+      <DropdownMenu onOpenChange={handleDropdownOpenChange} open={dropdownOpen}>
+        <Tooltip onOpenChange={setTooltipOpen} open={tooltipOpen}>
           <DropdownMenuTrigger asChild>
             <TooltipTrigger asChild>
               <button
