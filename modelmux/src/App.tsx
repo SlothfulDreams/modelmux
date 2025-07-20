@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { AppSidebar } from "./components/ChatInterface/app-sidebar";
-import { SidebarProvider, SidebarInset } from "./components/ui/sidebar";
 import { ChatInterface } from "@/components/ChatInterface/chat-interface";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ManageModel } from "@/components/manage-model";
+import Layout from "@/components/sidebar/layout";
 
 export type View = "chat" | "models";
 
@@ -12,13 +11,10 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <SidebarProvider>
-        <AppSidebar setCurrentView={setCurrentView} />
-        <SidebarInset>
-          {currentView === "chat" && <ChatInterface />}
-          {currentView === "models" && <ManageModel />}
-        </SidebarInset>
-      </SidebarProvider>
+      <Layout setCurrentView={setCurrentView}>
+        {currentView === "chat" && <ChatInterface />}
+        {currentView === "models" && <ManageModel />}
+      </Layout>
     </ThemeProvider>
   );
 }
