@@ -49,6 +49,10 @@ export function ChatMessageActions() {
     }
   };
 
+  const handleRetryModel = (model: string) => {
+    return -1;
+  };
+
   return (
     <div className="mt-1 flex justify-end w-full">
       <DropdownMenu onOpenChange={handleDropdownOpenChange} open={dropdownOpen}>
@@ -83,7 +87,12 @@ export function ChatMessageActions() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {models.map((model) => (
-            <DropdownMenuItem key={model.name}>{model.name}</DropdownMenuItem>
+            <DropdownMenuItem
+              key={model.name}
+              onClick={handleRetryModel(model.name)}
+            >
+              {model.name}
+            </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem>Copy message</DropdownMenuItem>
