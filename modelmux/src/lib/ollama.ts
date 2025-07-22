@@ -7,10 +7,11 @@ interface MemoryMessage {
 
 async function sendModelMessage(
   userMessage: MemoryMessage,
-  memoryState: MemoryMessage[]
+  memoryState: MemoryMessage[],
+  model = "llama3.2:1b"
 ) {
   const msg = await ollama.chat({
-    model: "llama3.2:1b",
+    model: model,
     messages: [...memoryState, userMessage],
   });
 
