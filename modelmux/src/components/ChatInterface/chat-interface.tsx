@@ -17,12 +17,14 @@ export interface MemoryMessage {
 }
 
 export function ChatInterface() {
+  // UI state
   const [messages, setMessages] = useState<Message[]>([]);
-
   const [inputValue, setInputValue] = useState("");
+
+  // LLM State
   const [memory, setMemory] = useState<MemoryMessage[]>([]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (model?: string) => {
     const newUserMessage: MemoryMessage = { role: "user", content: inputValue };
     if (!inputValue.trim()) return;
 
@@ -53,6 +55,22 @@ export function ChatInterface() {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleRetryModel = async (messsageToRetry: Message, model: string) => {
+    const index = memory.findIndex(
+      (item) => item.content === messsageToRetry.content
+    );
+
+    const messageIndex = messages.findIndex(
+      (item) => item.content === messsageToRetry.content
+    );
+
+    const newMemory = memory.slice(0, index + 1);
+    const newMessage = messages.slice(0, messageIndex + 1);
+
+    setMemory(newMemory);
+    setMessages(newMessage);
   };
 
   return (

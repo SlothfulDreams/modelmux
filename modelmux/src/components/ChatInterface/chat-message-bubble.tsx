@@ -14,9 +14,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
     >
       <div
         className={`rounded-lg p-4 relative group ${
-          message.isUser
-            ? "bg-accent text-accent-foreground"
-            : "bg-muted"
+          message.isUser ? "bg-accent text-accent-foreground" : "bg-muted"
         }`}
       >
         <p className="text-sm leading-relaxed">{message.content}</p>
@@ -27,4 +25,4 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
       {!message.isUser && <ChatMessageActions />}
     </div>
   );
-} 
+}
