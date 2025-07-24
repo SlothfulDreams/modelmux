@@ -18,11 +18,11 @@ export interface MemoryMessage {
 
 export function ChatInterface() {
   // UI state
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatLog, setChatLog] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
 
   // LLM State
-  const [memory, setMemory] = useState<MemoryMessage[]>([]);
+  const [promptHistory, setPromptHistory] = useState<MemoryMessage[]>([]);
 
   const handleSendMessage = async (model?: string) => {
     const newUserMessage: MemoryMessage = { role: "user", content: inputValue };
@@ -35,18 +35,18 @@ export function ChatInterface() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setChatLog((prev) => [...prev, userMessage]);
 
     // LLM response
-    const { message, data } = await Response(newUserMessage, memory);
+    const { message, data } = await Response(newUserMessage, promptHistory);
     const llmMessage: MemoryMessage = {
       role: "assistant",
       content: message,
     };
 
-    setMemory((prev) => [...prev, newUserMessage, llmMessage]);
+    setPromptHistory((prev) => [...prev, newUserMessage, llmMessage]);
 
-    setMessages((prev) => [...prev, data]);
+    setChatLog((prev) => [...prev, data]);
     setInputValue("");
   };
 
@@ -58,25 +58,25 @@ export function ChatInterface() {
   };
 
   const handleRetryModel = async (messsageToRetry: Message, model: string) => {
-    const index = memory.findIndex(
+    const index = promptHistory.findIndex(
       (item) => item.content === messsageToRetry.content
     );
 
-    const messageIndex = messages.findIndex(
+    const messageIndex = chatLog.findIndex(
       (item) => item.content === messsageToRetry.content
     );
 
-    const newMemory = memory.slice(0, index + 1);
-    const newMessage = messages.slice(0, messageIndex + 1);
+    const newPromptHistory = promptHistory.slice(0, index + 1);
+    const newChatLog = chatLog.slice(0, messageIndex + 1);
 
-    setMemory(newMemory);
-    setMessages(newMessage);
+    setPromptHistory(newPromptHistory);
+    setChatLog(newChatLog);
   };
 
   return (
     <div className="flex flex-col h-screen bg-background">
       <ScrollArea className="flex-1 p-4">
-        <ChatMessages messages={messages} />
+        <ChatMessages chatLog={chatLog} />
       </ScrollArea>
       <div className="p-4 border-t bg-background sticky bottom-0">
         <div className="max-w-4xl mx-auto">
