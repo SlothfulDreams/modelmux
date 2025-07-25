@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
 import { Response } from "@/lib/ollama";
+import { RetryContext } from "@/components/ChatInterface/Context/ChatContext";
 
 export interface Message {
   id: string;
@@ -66,17 +67,33 @@ export function ChatInterface() {
       (item) => item.content === messsageToRetry.content
     );
 
-    const newPromptHistory = promptHistory.slice(0, index + 1);
+    const currentMessage: MemoryMessage = {
+      role: "user",
+      content: messsageToRetry.content,
+    };
+
+    const newPromptHistory = promptHistory.slice(0, index);
     const newChatLog = chatLog.slice(0, messageIndex + 1);
 
-    setPromptHistory(newPromptHistory);
-    setChatLog(newChatLog);
+    const { message, data } = await Response(
+      currentMessage,
+      newPromptHistory,
+      model
+    );
+
+    const llmMessage: MemoryMessage = {
+      role: "assistant",
+      content: message,
+    };
+
+    setPromptHistory([...newPromptHistory, currentMessage, llmMessage]);
+    setChatLog([...newChatLog, data]);
   };
 
   return (
     <div className="flex flex-col h-screen bg-background">
       <ScrollArea className="flex-1 p-4">
-        <ChatMessages chatLog={chatLog} />
+        <ChatMessages chatLog={chatLog} onRetry={handleRetryModel} />
       </ScrollArea>
       <div className="p-4 border-t bg-background sticky bottom-0">
         <div className="max-w-4xl mx-auto">

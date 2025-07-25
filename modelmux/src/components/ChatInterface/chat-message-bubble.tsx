@@ -1,11 +1,20 @@
 import { Message } from "./chat-interface";
 import { ChatMessageActions } from "./chat-message-actions";
+import { RetryContext } from "./Context/ChatContext";
 
 interface ChatMessageBubbleProps {
   message: Message;
+  onRetry: (message: Message, modelName: string) => void;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
+export function ChatMessageBubble({
+  message,
+  onRetry,
+}: ChatMessageBubbleProps) {
+  const handleRetryForThisMessage = (modelName: string) => {
+    onRetry(message, modelName);
+  };
+
   return (
     <div
       className={`inline-flex flex-col max-w-[80%] ${
@@ -22,7 +31,11 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
           {message.timestamp.toLocaleTimeString()}
         </span>
       </div>
-      {!message.isUser && <ChatMessageActions />}
+      {!message.isUser && (
+        <RetryContext value={handleRetryForThisMessage}>
+          <ChatMessageActions />
+        </RetryContext>
+      )}
     </div>
   );
 }

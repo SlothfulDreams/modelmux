@@ -11,9 +11,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getCurrentModel, modelList } from "@/lib/ollama";
 import { ModelResponse } from "ollama";
+import { RetryContext } from "./Context/ChatContext";
 
 export function ChatMessageActions() {
   const [modelName, setModelName] = useState<string | undefined>("");
@@ -22,6 +23,8 @@ export function ChatMessageActions() {
   const [error, setError] = useState<Error | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const retryHandle = useContext(RetryContext);
 
   useEffect(() => {
     async function fetchData() {
@@ -86,7 +89,7 @@ export function ChatMessageActions() {
             <DropdownMenuItem
               key={model.name}
               onClick={() => {
-                // handleRetryModel(model.name);
+                retryHandle(model.name);
               }}
             >
               {model.name}
