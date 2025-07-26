@@ -22,14 +22,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { SettingsModal } from "@/components/settings-modal";
+import { View } from "@/App";
 
 // Chat history items
 const chatItems = [
-  {
-    title: "New Chat",
-    url: "#",
-    icon: Plus,
-  },
   {
     title: "Previous Chat 1",
     url: "#",
@@ -47,28 +43,41 @@ const chatItems = [
   },
 ];
 
-// Menu items.
-const menuItems = [
-  {
-    title: "Search Chats",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Chat History",
-    url: "#",
-    icon: History,
-  },
-  {
-    title: "Manage Models",
-    url: "#",
-    icon: Folder,
-  },
-];
+type AppSidebarProps = {
+  setCurrentView: (view: View) => void;
+};
 
-export function AppSidebar() {
+export function AppSidebar({ setCurrentView }: AppSidebarProps) {
   const { state } = useSidebar();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Menu items.
+  const menuItems = [
+    {
+      title: "New Chat",
+      action: () => setCurrentView("chat"),
+      icon: Plus,
+    },
+    {
+      title: "Search Chats",
+      action: () => {
+        "N/A";
+      },
+      icon: Search,
+    },
+    {
+      title: "Chat History",
+      action: () => {
+        "N/A";
+      },
+      icon: History,
+    },
+    {
+      title: "Manage Models",
+      action: () => setCurrentView("models"),
+      icon: Folder,
+    },
+  ];
 
   return (
     <>
@@ -91,11 +100,9 @@ export function AppSidebar() {
               <SidebarMenu className={state === "collapsed" ? "mt-10" : ""}>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
+                    <SidebarMenuButton onClick={item.action}>
+                      <item.icon />
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

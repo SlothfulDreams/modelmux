@@ -1,13 +1,19 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ChatInterface/app-sidebar";
+import { View } from "@/App";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+type LayoutProps = {
+  children: React.ReactNode;
+  setCurrentView: (view: View) => void;
+};
+
+export default function Layout({ children, setCurrentView }: LayoutProps) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main>
-        {children}
-      </main>
+      <AppSidebar setCurrentView={setCurrentView} />
+      <SidebarInset>
+        <main>{children}</main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

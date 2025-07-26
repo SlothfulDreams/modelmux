@@ -11,15 +11,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getCurrentModel, modelList } from "@/lib/ollama";
 import { ModelResponse } from "ollama";
+import { RetryContext } from "./Context/ChatContext";
 
 export function ChatMessageActions() {
   const [modelName, setModelName] = useState<string | undefined>("");
   const [models, setModels] = useState<ModelResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const retryHandle = useContext(RetryContext);
 
   useEffect(() => {
     async function fetchData() {
@@ -40,10 +45,17 @@ export function ChatMessageActions() {
     fetchData();
   }, []);
 
+  const handleDropdownOpenChange = (open: boolean) => {
+    setDropdownOpen(open);
+    if (open) {
+      setTooltipOpen(false);
+    }
+  };
+
   return (
     <div className="mt-1 flex justify-end w-full">
-      <DropdownMenu>
-        <Tooltip>
+      <DropdownMenu onOpenChange={handleDropdownOpenChange} open={dropdownOpen}>
+        <Tooltip onOpenChange={setTooltipOpen} open={tooltipOpen}>
           <DropdownMenuTrigger asChild>
             <TooltipTrigger asChild>
               <button
@@ -74,7 +86,14 @@ export function ChatMessageActions() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {models.map((model) => (
-            <DropdownMenuItem key={model.name}>{model.name}</DropdownMenuItem>
+            <DropdownMenuItem
+              key={model.name}
+              onClick={() => {
+                retryHandle(model.name);
+              }}
+            >
+              {model.name}
+            </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem>Copy message</DropdownMenuItem>
