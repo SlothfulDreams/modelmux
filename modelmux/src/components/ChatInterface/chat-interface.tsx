@@ -73,7 +73,7 @@ export function ChatInterface() {
     };
 
     const newPromptHistory = promptHistory.slice(0, index);
-    const newChatLog = chatLog.slice(0, messageIndex + 1);
+    const newChatLog = chatLog.slice(0, messageIndex);
 
     const { message, data } = await Response(
       currentMessage,
