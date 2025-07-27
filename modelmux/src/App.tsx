@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ManageModel } from "@/components/manage-model";
 import Layout from "@/components/sidebar/layout";
 
-export type View = "chat" | "models";
+export type View = "chat" | "models" | "workspaces";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("chat");
