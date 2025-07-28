@@ -4,6 +4,7 @@ import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ChatInterface } from "@/components/ChatInterface/chat-interface";
+import { X } from "lucide-react";
 
 interface KnowledgeItem {
   id: string;
@@ -23,6 +24,10 @@ export default function Workspace() {
       ]);
       setNewLink("");
     }
+  };
+
+  const handleDeleteLink = (id: string) => {
+    setKnowledge(knowledge.filter((item) => item.id != id));
   };
 
   return (
@@ -48,15 +53,26 @@ export default function Workspace() {
             <div className="space-y-2">
               {knowledge.length > 0 ? (
                 knowledge.map((item) => (
-                  <div key={item.id} className="p-2 border rounded-md bg-muted">
+                  <div
+                    key={item.id}
+                    className="group flex items-center justify-between p-2 border rounded-md bg-muted"
+                  >
                     <a
                       href={item.content}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline truncate"
+                      className="text-blue-500 hover:underline truncate flex-1"
                     >
                       {item.content}
                     </a>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                      onClick={() => handleDeleteLink(item.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))
               ) : (
