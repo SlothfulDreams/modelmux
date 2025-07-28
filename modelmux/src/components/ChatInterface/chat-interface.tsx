@@ -3,7 +3,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
 import { Response } from "@/lib/ollama";
-import { RetryContext } from "@/components/ChatInterface/Context/ChatContext";
 
 export interface Message {
   id: string;
@@ -17,7 +16,11 @@ export interface MemoryMessage {
   content: string;
 }
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  isSubSection?: boolean;
+}
+
+export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
   // UI state
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -60,11 +63,11 @@ export function ChatInterface() {
 
   const handleRetryModel = async (messsageToRetry: Message, model: string) => {
     const index = promptHistory.findIndex(
-      (item) => item.content === messsageToRetry.content
+      (item) => item.content === messsageToRetry.content,
     );
 
     const messageIndex = chatLog.findIndex(
-      (item) => item.content === messsageToRetry.content
+      (item) => item.content === messsageToRetry.content,
     );
 
     const currentMessage: MemoryMessage = {
@@ -78,7 +81,7 @@ export function ChatInterface() {
     const { message, data } = await Response(
       currentMessage,
       newPromptHistory,
-      model
+      model,
     );
 
     const llmMessage: MemoryMessage = {
@@ -90,8 +93,12 @@ export function ChatInterface() {
     setChatLog([...newChatLog, data]);
   };
 
+  const chatContainerClasses = isSubSection
+    ? "flex flex-col h-full bg-background"
+    : "flex flex-col h-screen bg-background";
+
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className={chatContainerClasses}>
       <ScrollArea className="flex-1 p-4">
         <ChatMessages chatLog={chatLog} onRetry={handleRetryModel} />
       </ScrollArea>

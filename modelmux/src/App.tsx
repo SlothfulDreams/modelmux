@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChatInterface } from "@/components/ChatInterface/chat-interface";
+import  Workspace from "@/components/Workspace/workspace";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ManageModel } from "@/components/manage-model";
 import Layout from "@/components/sidebar/layout";
@@ -14,6 +15,7 @@ function App() {
       <Layout setCurrentView={setCurrentView}>
         {currentView === "chat" && <ChatInterface />}
         {currentView === "models" && <ManageModel />}
+        {currentView === "workspaces" && <Workspace />}
       </Layout>
     </ThemeProvider>
   );
