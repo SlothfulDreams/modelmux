@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   build: {
     lib: {
-      entry: path.join(__dirname, "src/preload.ts"),
+      entry: path.join(__dirname, "src/preload.mts"),
       formats: ["es"],
     },
   },

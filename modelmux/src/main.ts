@@ -1,8 +1,11 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, IpcMainEvent } from "electron";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import started from "electron-squirrel-startup";
 import { exec, ChildProcess } from "node:child_process";
+import dotenv from "dotenv";
+import { search } from "./lib/duckduckgo";
+dotenv.config();
 
 // import Store from "electron-store";
 
@@ -35,7 +38,7 @@ const createWindow = () => {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(
-      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
     );
   }
 
@@ -57,6 +60,18 @@ app.on("ready", () => {
     console.error(`stderr: ${stderr}`);
   });
   createWindow();
+});
+
+// IPC process
+ipcMain.handle("greet", (event: IpcMainEvent, args) => {
+  console.log("Hello");
+});
+
+// TODO: Fix This args is undefined
+ipcMain.handle("searchDuckDuckGo", async (event: IpcMainEvent, args) => {
+  const { apiKey, profile } = process.env;
+  const results = await search(args, apiKey, profile);
+  console.log("URL: ", args, "ApiKey", apiKey, "profile", profile);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

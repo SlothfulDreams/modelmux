@@ -2,29 +2,28 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { createSmitheryUrl } from "@smithery/sdk";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
-const serverUrl: URL = createSmitheryUrl(
-  "https://server.smithery.ai/@nickclyde/duckduckgo-mcp-server",
-  {
-    apiKey: process.env.apiKey,
-    profile: process.env.profile,
-  },
-);
+export async function search(url: string, apiKey: string, profile: string) {
+  const serverUrl: URL = createSmitheryUrl(
+    "https://server.smithery.ai/@nickclyde/duckduckgo-mcp-server",
+    {
+      apiKey: apiKey,
+      profile: profile,
+    },
+  );
 
-const transport = new StreamableHTTPClientTransport(serverUrl);
+  const transport = new StreamableHTTPClientTransport(serverUrl);
 
-const client = new Client({
-  name: "modelmux",
-  version: "1.0.0",
-});
+  const client = new Client({
+    name: "modelmux",
+    version: "1.0.0",
+  });
 
-await client.connect(transport);
+  await client.connect(transport);
 
-// List available tools
-export async function response() {
   return client.callTool({
     name: "fetch_content",
     arguments: {
-      url: process.env.url,
+      url: url,
     },
   });
 }
