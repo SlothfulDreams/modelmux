@@ -5,7 +5,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
   greet: (message: string) => ipcRenderer.invoke("greet", message),
+
   searchDuckDuckGo: async (url: string) => {
-    await ipcRenderer.invoke("searchDuckDuckGo");
+    await ipcRenderer.invoke("searchDuckDuckGo", url);
   },
 });

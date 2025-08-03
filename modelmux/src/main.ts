@@ -67,12 +67,15 @@ ipcMain.handle("greet", (event: IpcMainEvent, args) => {
   console.log("Hello");
 });
 
-// TODO: Fix This args is undefined
-ipcMain.handle("searchDuckDuckGo", async (event: IpcMainEvent, args) => {
-  const { apiKey, profile } = process.env;
-  const results = await search(args, apiKey, profile);
-  console.log("URL: ", args, "ApiKey", apiKey, "profile", profile);
-});
+ipcMain.handle(
+  "searchDuckDuckGo",
+  async (event: IpcMainEvent, args: string) => {
+    const { apiKey, profile } = process.env;
+    const res = await search(args, apiKey, profile);
+    const structuredContent = res.structuredContent.result;
+    console.log(res);
+  },
+);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

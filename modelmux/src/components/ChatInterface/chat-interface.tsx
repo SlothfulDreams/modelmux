@@ -28,6 +28,7 @@ export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
   // LLM State
   const [promptHistory, setPromptHistory] = useState<MemoryMessage[]>([]);
 
+  // TODO: Remove this later
   window.api.searchDuckDuckGo("https://en.wikipedia.org/wiki/War_of_1812");
 
   const handleSendMessage = async (model?: string) => {

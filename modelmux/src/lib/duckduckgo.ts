@@ -1,8 +1,13 @@
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createSmitheryUrl } from "@smithery/sdk";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
-export async function search(url: string, apiKey: string, profile: string) {
+export async function search(
+  url: string,
+  apiKey: string,
+  profile: string,
+): Promise<CallToolResult> {
   const serverUrl: URL = createSmitheryUrl(
     "https://server.smithery.ai/@nickclyde/duckduckgo-mcp-server",
     {
