@@ -4,8 +4,6 @@ const { contextBridge, ipcRenderer } = require("electron");
 // const { search } = require("./lib/duckduckgo.ts");
 
 contextBridge.exposeInMainWorld("api", {
-  greet: (message: string) => ipcRenderer.invoke("greet", message),
-
   searchDuckDuckGo: async (url: string) => {
     await ipcRenderer.invoke("searchDuckDuckGo", url);
   },

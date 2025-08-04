@@ -64,7 +64,7 @@ app.on("ready", () => {
 
 // IPC process
 ipcMain.handle("greet", (event: IpcMainEvent, args) => {
-  console.log("Hello");
+  console.log("Hello from Main:", args);
 });
 
 ipcMain.handle(
@@ -72,8 +72,9 @@ ipcMain.handle(
   async (event: IpcMainEvent, args: string) => {
     const { apiKey, profile } = process.env;
     const res = await search(args, apiKey, profile);
+    console.log("Got It");
     const structuredContent = res.structuredContent.result;
-    console.log(res);
+    return structuredContent;
   },
 );
 
