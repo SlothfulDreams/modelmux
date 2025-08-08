@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,6 +15,30 @@ interface KnowledgeItem {
 export default function Workspace() {
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [newLink, setNewLink] = useState("");
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+
+  useEffect(() => {
+    const searchKnowledgeItems = async () => {
+      if (knowledge.length === 0) {
+        setSearchResults([]);
+        return;
+      }
+
+      const results: string[] = [];
+      for (const item of knowledge) {
+        try {
+          const result = await window.api.searchDuckDuckGo(item.content);
+          results.push(result);
+        } catch (error) {
+          console.error(`Failed to search ${item.content}:`, error);
+          results.push(`Error searching ${item.content}`);
+        }
+      }
+      setSearchResults(results);
+    };
+
+    searchKnowledgeItems();
+  }, [knowledge]);
 
   const handleAddLink = () => {
     if (newLink.trim() !== "") {
@@ -85,6 +109,24 @@ export default function Workspace() {
         </div>
         {/* Right Panel: Chat */}
         <div className="col-span-2 border rounded-lg flex flex-col overflow-hidden">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold mb-2">Knowledge Search Results</h3>
+            <ScrollArea className="h-32">
+              {searchResults.length > 0 ? (
+                <div className="space-y-2">
+                  {searchResults.map((result, index) => (
+                    <div key={index} className="p-2 bg-muted rounded text-sm">
+                      {result}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No search results yet. Add knowledge items to see results.
+                </p>
+              )}
+            </ScrollArea>
+          </div>
           <ChatInterface isSubSection={true} />
         </div>
       </div>

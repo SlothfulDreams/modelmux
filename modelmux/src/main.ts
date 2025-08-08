@@ -72,7 +72,7 @@ ipcMain.handle(
   async (event: IpcMainEvent, args: string) => {
     const { apiKey, profile } = process.env;
     const res = await search(args, apiKey, profile);
-    console.log("Got It");
+    console.log("Got it");
     const structuredContent = res.structuredContent.result;
     return structuredContent;
   },
