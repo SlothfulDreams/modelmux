@@ -12,7 +12,7 @@ interface KnowledgeItem {
   content: string;
 }
 
-export default function Workspace() {
+export default function WorkspaceInterface() {
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [newLink, setNewLink] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);

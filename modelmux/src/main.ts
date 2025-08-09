@@ -30,6 +30,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: join(__dirname, "preload.js"),
+      webSecurity: false, // Disable CORS for development idk how to get CORS working
     },
   });
 
@@ -59,6 +60,7 @@ app.on("ready", () => {
     console.log(`stdout: ${stdout}`);
     console.error(`stderr: ${stderr}`);
   });
+
   createWindow();
 });
 
