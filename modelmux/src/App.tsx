@@ -3,8 +3,9 @@ import { ChatInterface } from "@/components/ChatInterface/chat-interface";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ManageModel } from "@/components/manage-model";
 import Layout from "@/components/sidebar/layout";
+import WorkspaceInterface from "@/components/Workspace/workspace-interface";
 
-export type View = "chat" | "models";
+export type View = "chat" | "models" | "workspaces";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("chat");
@@ -14,6 +15,7 @@ function App() {
       <Layout setCurrentView={setCurrentView}>
         {currentView === "chat" && <ChatInterface />}
         {currentView === "models" && <ManageModel />}
+        {currentView === "workspaces" && <WorkspaceInterface />}
       </Layout>
     </ThemeProvider>
   );

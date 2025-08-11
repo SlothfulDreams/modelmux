@@ -1,8 +1,11 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, IpcMainEvent } from "electron";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import started from "electron-squirrel-startup";
 import { exec, ChildProcess } from "node:child_process";
+import dotenv from "dotenv";
+import { search } from "./lib/duckduckgo";
+dotenv.config();
 
 // import Store from "electron-store";
 
@@ -12,6 +15,7 @@ import { exec, ChildProcess } from "node:child_process";
 // console.log(userPref.get("model"));
 
 let ollamaProcess: ChildProcess;
+let chromaProcess: ChildProcess;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -27,6 +31,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: join(__dirname, "preload.js"),
+      webSecurity: false, // Disable CORS for development idk how to get CORS working
     },
   });
 
@@ -35,7 +40,7 @@ const createWindow = () => {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(
-      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
     );
   }
 
@@ -50,14 +55,41 @@ app.on("ready", () => {
   // Start ollama serve
   ollamaProcess = exec("ollama serve", (error, stdout, stderr) => {
     if (error) {
-      console.error(`exec error: ${error}`);
+      console.error(`Ollama exec error: ${error}`);
       return;
     }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+    console.log(`Ollama stdout: ${stdout}`);
+    console.error(`Ollama stderr: ${stderr}`);
   });
+
+  // Start ChromaDB
+  chromaProcess = exec("chroma run", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`ChromaDB exec error: ${error}`);
+      return;
+    }
+    console.log(`ChromaDB stdout: ${stdout}`);
+    console.error(`ChromaDB stderr: ${stderr}`);
+  });
+
   createWindow();
 });
+
+// IPC process
+ipcMain.handle("greet", (event: IpcMainEvent, args) => {
+  console.log("Hello from Main:", args);
+});
+
+ipcMain.handle(
+  "searchDuckDuckGo",
+  async (event: IpcMainEvent, args: string) => {
+    const { apiKey, profile } = process.env;
+    const res = await search(args, apiKey, profile);
+    console.log("Got it");
+    const structuredContent = res.structuredContent.result;
+    return structuredContent;
+  },
+);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -72,6 +104,11 @@ app.on("will-quit", () => {
   // Kill the ollama process
   if (ollamaProcess) {
     ollamaProcess.kill();
+  }
+  
+  // Kill the ChromaDB process
+  if (chromaProcess) {
+    chromaProcess.kill();
   }
 });
 

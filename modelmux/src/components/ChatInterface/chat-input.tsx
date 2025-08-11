@@ -20,7 +20,7 @@ export function ChatInput({ value, onChange, onKeyDown, onSend }: ChatInputProps
         placeholder="Type your message here..."
         className="flex-1"
       />
-      <Button onClick={onSend} disabled={!value.trim()}>
+      <Button onClick={() => onSend()} disabled={!value.trim()}>
         <Send className="h-4 w-4" />
       </Button>
     </div>

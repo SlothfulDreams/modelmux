@@ -6,6 +6,7 @@ import {
   Folder,
   Settings,
   Search,
+  Users,
 } from "lucide-react";
 
 import {
@@ -76,6 +77,11 @@ export function AppSidebar({ setCurrentView }: AppSidebarProps) {
       title: "Manage Models",
       action: () => setCurrentView("models"),
       icon: Folder,
+    },
+    {
+      title: "Workspaces",
+      action: () => setCurrentView("workspaces"),
+      icon: Users,
     },
   ];
 
