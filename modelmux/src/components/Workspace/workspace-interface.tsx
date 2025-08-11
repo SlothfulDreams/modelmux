@@ -5,6 +5,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ChatInterface } from "@/components/ChatInterface/chat-interface";
 import { X } from "lucide-react";
+import { chromaDB } from "@/lib/chromadb";
+import { generateEmbeddings } from "@/lib/ollama";
 
 interface KnowledgeItem {
   id: string;
@@ -35,6 +37,27 @@ export default function WorkspaceInterface() {
         }
       }
       setSearchResults(results);
+
+      try {
+        const validResults = results.filter(
+          (result) => result && !result.startsWith("Error searching"),
+        );
+
+        if (validResults.length > 0) {
+          const embeddings = await generateEmbeddings(validResults);
+          const knowledgeItemIds = knowledge
+            .map((item) => item.id)
+            .slice(0, validResults.length);
+
+          await chromaDB.embedSearchResults(
+            validResults,
+            knowledgeItemIds,
+            embeddings,
+          );
+        }
+      } catch (error) {
+        console.error("Failed to embed search results in ChromaDB:", error);
+      }
     };
 
     searchKnowledgeItems();
@@ -50,14 +73,19 @@ export default function WorkspaceInterface() {
     }
   };
 
-  const handleDeleteLink = (id: string) => {
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await chromaDB.deleteByKnowledgeItemId(id);
+    } catch (error) {
+      console.error("Failed to delete embeddings from ChromaDB:", error);
+    }
     setKnowledge(knowledge.filter((item) => item.id != id));
   };
 
   return (
     <div className="flex flex-col h-screen p-4 space-y-4">
       <h1 className="text-2xl font-bold">Workspace</h1>
-      <div className="grid grid-cols-3 gap-4 flex-1 overflow-hidden">
+      <div className="grid grid-cols-3 gap-4 flex-1">
         {/* Left Panel: Knowledge Base */}
         <div className="col-span-1 flex flex-col space-y-4 p-4 border rounded-lg">
           <h2 className="text-xl font-semibold">Knowledge Base</h2>
@@ -108,26 +136,8 @@ export default function WorkspaceInterface() {
           </ScrollArea>
         </div>
         {/* Right Panel: Chat */}
-        <div className="col-span-2 border rounded-lg flex flex-col overflow-hidden">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold mb-2">Knowledge Search Results</h3>
-            <ScrollArea className="h-32">
-              {searchResults.length > 0 ? (
-                <div className="space-y-2">
-                  {searchResults.map((result, index) => (
-                    <div key={index} className="p-2 bg-muted rounded text-sm">
-                      {result}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  No search results yet. Add knowledge items to see results.
-                </p>
-              )}
-            </ScrollArea>
-          </div>
-          <ChatInterface isSubSection={true} />
+        <div className="col-span-2 border rounded-lg flex flex-col h-full min-h-0">
+          <ChatInterface useEmbeddings={true} isEmbedded={true} />
         </div>
       </div>
     </div>

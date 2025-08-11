@@ -15,6 +15,7 @@ dotenv.config();
 // console.log(userPref.get("model"));
 
 let ollamaProcess: ChildProcess;
+let chromaProcess: ChildProcess;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -54,11 +55,21 @@ app.on("ready", () => {
   // Start ollama serve
   ollamaProcess = exec("ollama serve", (error, stdout, stderr) => {
     if (error) {
-      console.error(`exec error: ${error}`);
+      console.error(`Ollama exec error: ${error}`);
       return;
     }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+    console.log(`Ollama stdout: ${stdout}`);
+    console.error(`Ollama stderr: ${stderr}`);
+  });
+
+  // Start ChromaDB
+  chromaProcess = exec("chroma run", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`ChromaDB exec error: ${error}`);
+      return;
+    }
+    console.log(`ChromaDB stdout: ${stdout}`);
+    console.error(`ChromaDB stderr: ${stderr}`);
   });
 
   createWindow();
@@ -93,6 +104,11 @@ app.on("will-quit", () => {
   // Kill the ollama process
   if (ollamaProcess) {
     ollamaProcess.kill();
+  }
+  
+  // Kill the ChromaDB process
+  if (chromaProcess) {
+    chromaProcess.kill();
   }
 });
 

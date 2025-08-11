@@ -1,143 +1,109 @@
-export class ChromaDBService {
-  private collectionName: string;
-  private baseUrl = 'http://localhost:8000';
-  private tenant = 'default_tenant';
-  private database = 'default_database';
-  private collectionId?: string;
+import { ChromaClient, Collection } from "chromadb";
 
-  constructor(collectionName = 'documents') {
-    this.collectionName = collectionName;
+class ChromaDBManager {
+  private client: ChromaClient;
+  private collection: Collection | null = null;
+
+  constructor() {
+    this.client = new ChromaClient();
   }
 
-  private async makeRequest(endpoint: string, method = 'GET', body?: any) {
-    const url = `${this.baseUrl}${endpoint}`;
-    const options: RequestInit = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    if (body) {
-      options.body = JSON.stringify(body);
+  async getOrCreateCollection(name = "search_results") {
+    // Lazy Eval
+    if (!this.collection) {
+      this.collection = await this.client.getOrCreateCollection({
+        name,
+      });
     }
-
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ChromaDB request failed: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-
-    const responseText = await response.text();
-    return responseText ? JSON.parse(responseText) : {};
+    return this.collection;
   }
 
-  async getOrCreateCollection() {
+  async embedSearchResults(
+    searchResults: string[],
+    knowledgeItemIds: string[],
+    embeddings: number[][],
+  ) {
     try {
-      // Try to get the collection first
-      const collections = await this.makeRequest(
-        `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections`
+      const collection = await this.getOrCreateCollection();
+
+      const documents = searchResults.filter(
+        (result) => result && !result.startsWith("Error searching"),
       );
-      
-      const existingCollection = collections.find((c: any) => c.name === this.collectionName);
-      if (existingCollection) {
-        this.collectionId = existingCollection.id;
-        return existingCollection;
+      const ids = knowledgeItemIds.slice(0, documents.length);
+      const validEmbeddings = embeddings.slice(0, documents.length);
+
+      if (documents.length === 0) {
+        console.warn("ChromaDB: No valid documents to embed");
+        return;
       }
 
-      // Create the collection if it doesn't exist
-      const newCollection = await this.makeRequest(
-        `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections`,
-        'POST',
-        {
-          name: this.collectionName,
-          get_or_create: true
-        }
+      if (documents.length !== validEmbeddings.length) {
+        throw new Error("Number of documents must match number of embeddings");
+      }
+
+      console.log("ChromaDB: Adding to collection...");
+      await collection.add({
+        ids,
+        documents,
+        embeddings: validEmbeddings,
+        metadatas: ids.map((id) => ({
+          knowledge_item_id: id,
+          timestamp: Date.now(),
+        })),
+      });
+
+      console.log(
+        `ChromaDB: Successfully embedded ${documents.length} search results`,
       );
-      this.collectionId = newCollection.id;
-      return newCollection;
     } catch (error) {
-      console.error('Failed to get or create collection:', error);
+      console.error("ChromaDB: Failed to embed search results:", error);
       throw error;
     }
   }
 
-  async addDocuments(documents: string[], metadatas?: object[], ids?: string[]) {
-    await this.getOrCreateCollection();
-    
-    const documentIds = ids || documents.map((_, index) => `doc_${Date.now()}_${index}`);
-    
-    await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}/add`,
-      'POST',
-      {
-        documents,
-        ids: documentIds,
-        metadatas: metadatas || [],
+  async queryCollection(
+    queryText: string,
+    queryEmbedding: number[],
+    nResults = 5,
+  ) {
+    try {
+      const collection = await this.getOrCreateCollection();
+
+      const results = await collection.query({
+        queryEmbeddings: [queryEmbedding],
+        nResults,
+      });
+
+      return results;
+    } catch (error) {
+      console.error("Failed to query collection:", error);
+      throw error;
+    }
+  }
+
+  async deleteByKnowledgeItemId(knowledgeItemId: string) {
+    try {
+      const collection = await this.getOrCreateCollection();
+
+      const results = await collection.get({
+        where: { knowledge_item_id: knowledgeItemId },
+      });
+
+      if (results.ids && results.ids.length > 0) {
+        await collection.delete({
+          ids: results.ids,
+        });
+        console.log(
+          `Deleted embeddings for knowledge item: ${knowledgeItemId}`,
+        );
       }
-    );
-
-    return documentIds;
-  }
-
-  async queryDocuments(queryText: string, nResults = 5) {
-    await this.getOrCreateCollection();
-    
-    const results = await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}/query`,
-      'POST',
-      {
-        query_texts: [queryText],
-        n_results: nResults,
-      }
-    );
-
-    return {
-      documents: results.documents?.[0] || [],
-      metadatas: results.metadatas?.[0] || [],
-      distances: results.distances?.[0] || [],
-      ids: results.ids?.[0] || [],
-    };
-  }
-
-  async deleteDocuments(ids: string[]) {
-    await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}/delete`,
-      'POST',
-      {
-        ids,
-      }
-    );
-  }
-
-  async updateDocuments(ids: string[], documents: string[], metadatas?: object[]) {
-    await this.getOrCreateCollection();
-    
-    await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}/update`,
-      'POST',
-      {
-        ids,
-        documents,
-        metadatas,
-      }
-    );
-  }
-
-  async getCollectionCount() {
-    await this.getOrCreateCollection();
-    const result = await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}/count`
-    );
-    return result || 0;
-  }
-
-  async deleteCollection() {
-    await this.makeRequest(
-      `/api/v2/tenants/${this.tenant}/databases/${this.database}/collections/${this.collectionId}`,
-      'DELETE'
-    );
+    } catch (error) {
+      console.error("Failed to delete embeddings:", error);
+      throw error;
+    }
   }
 }
 
-export const chromaDB = new ChromaDBService();
+const chromaDB = new ChromaDBManager();
+
+export { chromaDB };

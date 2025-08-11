@@ -2,7 +2,8 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
-import { Response } from "@/lib/ollama";
+import { Response, generateSingleEmbedding } from "@/lib/ollama";
+import { chromaDB } from "@/lib/chromadb";
 
 export interface Message {
   id: string;
@@ -17,10 +18,14 @@ export interface MemoryMessage {
 }
 
 interface ChatInterfaceProps {
-  isSubSection?: boolean;
+  useEmbeddings?: boolean;
+  isEmbedded?: boolean;
 }
 
-export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
+export function ChatInterface({
+  useEmbeddings = false,
+  isEmbedded = false,
+}: ChatInterfaceProps) {
   // UI state
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -28,10 +33,37 @@ export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
   // LLM State
   const [promptHistory, setPromptHistory] = useState<MemoryMessage[]>([]);
 
+  const createMemoryMessage = (
+    role: "user" | "assistant",
+    content: string,
+  ): MemoryMessage => ({
+    role,
+    content,
+  });
+
+  const updateChatState = (
+    userMessage: MemoryMessage,
+    llmMessage: MemoryMessage,
+    data: Message,
+  ) => {
+    setPromptHistory((prev) => [...prev, userMessage, llmMessage]);
+    setChatLog((prev) => [...prev, data]);
+  };
+
+  const handleLLMResponse = async (
+    userMessage: MemoryMessage,
+    model?: string,
+  ) => {
+    const { message, data } = await Response(userMessage, promptHistory, model);
+    const llmMessage = createMemoryMessage("assistant", message);
+    updateChatState(userMessage, llmMessage, data);
+    return { message, data };
+  };
+
   const handleSendMessage = async (model?: string) => {
-    const newUserMessage: MemoryMessage = { role: "user", content: inputValue };
     if (!inputValue.trim()) return;
 
+    const newUserMessage = createMemoryMessage("user", inputValue);
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -41,16 +73,58 @@ export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
 
     setChatLog((prev) => [...prev, userMessage]);
 
-    // LLM response
-    const { message, data } = await Response(newUserMessage, promptHistory);
-    const llmMessage: MemoryMessage = {
-      role: "assistant",
-      content: message,
-    };
+    try {
+      if (useEmbeddings) {
+        console.log("Chat: Generating embedding for query...");
+        const queryEmbedding = await generateSingleEmbedding(inputValue);
+        console.log(
+          "Chat: Query embedding generated, length:",
+          queryEmbedding.length,
+        );
 
-    setPromptHistory((prev) => [...prev, newUserMessage, llmMessage]);
+        const searchResults = await chromaDB.queryCollection(
+          inputValue,
+          queryEmbedding,
+          5,
+        );
 
-    setChatLog((prev) => [...prev, data]);
+        let contextualMessage = newUserMessage;
+        if (searchResults.documents && searchResults.documents[0].length > 0) {
+          const context = searchResults.documents[0].join("\n\n");
+          console.log(
+            "Chat: Adding context to message, context length:",
+            context.length,
+          );
+          contextualMessage = createMemoryMessage(
+            "user",
+            `Context from knowledge base:\n${context}\n\nUser question: ${inputValue}`,
+          );
+        } else {
+          console.log(
+            "Chat: No relevant context found, proceeding without context",
+          );
+        }
+
+        console.log("Chat: Generating LLM response with context...");
+        await handleLLMResponse(contextualMessage, model);
+        console.log("Chat: Embedding-enhanced response completed");
+      } else {
+        console.log(
+          "Chat: Using basic mode (no embeddings) for query:",
+          inputValue,
+        );
+        await handleLLMResponse(newUserMessage, model);
+        console.log("Chat: Basic response completed");
+      }
+    } catch (error) {
+      console.error(
+        "Chat: Failed to query ChromaDB or generate response:",
+        error,
+      );
+      console.log("Chat: Falling back to basic mode");
+      await handleLLMResponse(newUserMessage, model);
+    }
+
     setInputValue("");
   };
 
@@ -93,7 +167,7 @@ export function ChatInterface({ isSubSection = false }: ChatInterfaceProps) {
     setChatLog([...newChatLog, data]);
   };
 
-  const chatContainerClasses = isSubSection
+  const chatContainerClasses = isEmbedded
     ? "flex flex-col h-full bg-background"
     : "flex flex-col h-screen bg-background";
 
