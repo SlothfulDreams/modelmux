@@ -12,13 +12,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useState, useContext } from "react";
-import { getCurrentModel, modelList } from "@/lib/ollama";
-import { ModelResponse } from "ollama";
+import { getCurrentModel, modelList, type OllamaModel } from "@/lib/ollama";
 import { RetryContext } from "./Context/ChatContext";
 
 export function ChatMessageActions() {
   const [modelName, setModelName] = useState<string | undefined>("");
-  const [models, setModels] = useState<ModelResponse[]>([]);
+  const [models, setModels] = useState<OllamaModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);

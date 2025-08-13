@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChatInterface } from "@/components/ChatInterface/chat-interface";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ManageModel } from "@/components/manage-model";
+import { ModelManagerInterface } from "@/components/ModelManager/model-manager-interface";
 import Layout from "@/components/sidebar/layout";
 import WorkspaceInterface from "@/components/Workspace/workspace-interface";
 
@@ -14,7 +14,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Layout setCurrentView={setCurrentView}>
         {currentView === "chat" && <ChatInterface />}
-        {currentView === "models" && <ManageModel />}
+        {currentView === "models" && <ModelManagerInterface />}
         {currentView === "workspaces" && <WorkspaceInterface />}
       </Layout>
     </ThemeProvider>
