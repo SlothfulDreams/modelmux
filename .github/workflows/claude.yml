@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      issues: write
+      issues: write  # Changed from 'read' to 'write' to allow issue creation
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
